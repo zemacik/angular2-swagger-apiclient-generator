@@ -1,0 +1,9 @@
+{{#definitions}}
+import { {{name}} } from './{{name}}';
+{{/definitions}}
+
+export const {{&className}}_MODELS: any[] = [
+{{#definitions}}
+    {{name}}{{^last}}, {{/last}}
+{{/definitions}}
+]; 

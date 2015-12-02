@@ -1,13 +1,12 @@
 import { Injectable } from 'angular2/angular2';
 import { Http, Response, Headers } from 'angular2/http';
-
-{{#definitions}}
-import {{name}} from './models/{{name}}'
-{{/definitions}}
+import { {{&className}}_MODELS } from './models/{{&className}}_models';
 
 @Injectable()
 export class {{&className}}ApiClientService {
-
+	
+	domain:string;
+	
 	constructor(public http: Http, options?: any) {
 		var domain = (typeof options === 'object') ? options.domain : options;
 		this.domain = typeof(domain) === 'string' ? domain : '{{&domain}}';
@@ -32,18 +31,75 @@ export class {{&className}}ApiClientService {
 	{{/parameters}}
 	* 
 	*/
-	public {{&methodName}}(parameters) {
-		if(parameters === undefined)
-				parameters = {};
-				
-		var domain = this.domain;
-		var path = '{{&path}}';	
-		
+	public {{&methodName}}({{#parameters}}{{&camelCaseName}}: {{typescriptType}}{{^last}}, {{/last}}{{/parameters}}) {
+		var uri = '{{&path}}';
+		var payload = {};	
+		var queryParameters = {};
 		let headers = new Headers();
+		headers.append('Content-Type', 'application/json');
 		
-		//headers.append('Content-Type', 'application/x-www-form-urlencoded');
-		
-		return this.http.GETPOSTUPDATEDELETE(uri,data,{headers: headers});
+{{#parameters}}
+			{{#isQueryParameter}}
+			{{#isSingleton}}
+		queryParameters['{{&name}}'] = '{{&singleton}}';
+			{{/isSingleton}}
+			{{^isSingleton}}
+			{{#isPatternType}}
+		Object.keys(parameters).forEach(function(parameterName) {
+			if(new RegExp('{{&pattern}}').test(parameterName)){
+				queryParameters[parameterName] = parameters[parameterName];
+			}
+		});
+			{{/isPatternType}}
+			{{^isPatternType}}
+		if(parameters['{{&camelCaseName}}'] !== undefined){
+			queryParameters['{{&name}}'] = parameters['{{&camelCaseName}}'];
+		}
+			{{/isPatternType}}
+			{{/isSingleton}}
+			{{/isQueryParameter}}
+			{{#isPathParameter}}
+		uri = uri.replace('{{=<% %>=}}{<%&name%>}<%={{ }}=%>', {{&camelCaseName}});
+			{{/isPathParameter}}
+			{{#isHeaderParameter}}
+			{{#isSingleton}}
+		headers.append('{{&name}}', '{{&singleton}}');
+			{{/isSingleton}}
+			{{^isSingleton}}
+		if(parameters['{{&camelCaseName}}'] !== undefined){
+			headers.append('{{&name}}', parameters['{{&camelCaseName}}']);
+		}
+			{{/isSingleton}}
+			{{/isHeaderParameter}}
+			{{#isBodyParameter}}
+		payload['{{&name}}'] = {{&camelCaseName}};
+			{{/isBodyParameter}}
+			{{#isFormParameter}}
+			{{#isSingleton}}
+		form['{{&name}}'] = '{{&singleton}}';
+			{{/isSingleton}}
+			{{^isSingleton}}
+		if(parameters['{{&camelCaseName}}'] !== undefined){
+			form['{{&name}}'] = parameters['{{&camelCaseName}}'];
+		}
+			{{/isSingleton}}
+			{{/isFormParameter}}
+{{/parameters}}		
+	
+		return this.http
+			.{{angular2httpMethod}}(this.domain + uri, payload, { headers: headers, params: queryParameters })
+			.map((res: Response) => {
+			   {{#hasJsonResponse}}
+               var result = res.json();
+			   {{/hasJsonResponse}}
+			   {{^hasJsonResponse}}
+			   var result = null;
+			   
+			   // TODO: this method does not return JSON response, so you need to handle response by your own
+			   {{/hasJsonResponse}}
+			   
+               return result;
+            });
 	}
 	
 {{/methods}}

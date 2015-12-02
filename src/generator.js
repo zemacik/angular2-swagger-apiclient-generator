@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 var Mustache = require('mustache');
-var beautify = require('js-beautify').js_beautify;
+//var beautify = require('js-beautify').js_beautify;
 //var Linter = require('tslint');
 var _ = require('lodash');
 
@@ -31,7 +31,8 @@ var Generator = (function () {
 
 		this.templates = {
 			'class': fs.readFileSync(__dirname + "/../templates/angular2-service.mustache", 'utf-8'),
-			'model': fs.readFileSync(__dirname + "/../templates/angular2-model.mustache", 'utf-8')
+			'model': fs.readFileSync(__dirname + "/../templates/angular2-model.mustache", 'utf-8'),
+			'models_export': fs.readFileSync(__dirname + "/../templates/angular2-models-export.mustache", 'utf-8')
 		};
 
 		this.LogMessage('Creating Mustache viewModel');
@@ -46,7 +47,7 @@ var Generator = (function () {
 
 		this.generateClient();
 		this.generateModels();
-		this.generateTypescriptDefinition();
+		this.generateCommonModelsExportDefinition();
 
 		this.LogMessage('API client generated successfully');
 	};
@@ -87,12 +88,22 @@ var Generator = (function () {
 		});
 	};
 
-	Generator.prototype.generateTypescriptDefinition = function () {
+	Generator.prototype.generateCommonModelsExportDefinition = function () {
 		if (this.initialized !== true)
 			this.initialize();
 
-		// generate Typescript Definition				
+		var outputdir = this._outputPath + '/models';
 
+		if (!fs.existsSync(outputdir))
+			fs.mkdirSync(outputdir);
+
+		this.LogMessage('Rendering common models export');
+		var result = this.renderLintAndBeautify(this.templates.models_export, this.viewModel, this.templates);
+
+		var outfile = outputdir + "/" + this.viewModel.className + '_models' + ".ts";
+
+		this.LogMessage('Creating output file', outfile);
+		fs.writeFileSync(outfile, result, 'utf-8')
 	};
 
 	Generator.prototype.renderLintAndBeautify = function (tempalte, model) {
@@ -109,7 +120,8 @@ var Generator = (function () {
         //         throw new Error(error.reason + ' in ' + error.evidence + ' (' + error.code + ')');
         // });
 
-		result = beautify(result, { indent_size: 4, max_preserve_newlines: 2 });
+		// NOTE: this has been commented because of curly braces were added on newline after beaufity
+		//result = beautify(result, { indent_size: 4, max_preserve_newlines: 2 });
 		return result;
 	}
 
@@ -148,10 +160,14 @@ var Generator = (function () {
 					className: CLASS_NAME,
 					methodName: op['x-swagger-js-method-name'] ? op['x-swagger-js-method-name'] : (op.operationId ? op.operationId : that.getPathToMethodName(m, path)),
 					method: m.toUpperCase(),
+					angular2httpMethod: m.toLowerCase(),
 					isGET: m.toUpperCase() === 'GET',
 					summary: op.description,
 					isSecure: swagger.security !== undefined || op.security !== undefined,
-					parameters: []
+					parameters: [],
+					hasJsonResponse: _.some(op.produces, function (response) { // TODO PREROBIT
+						return response.indexOf('/json') != -1;
+					})
 				};
 
 				var params = [];
@@ -168,12 +184,16 @@ var Generator = (function () {
 					if (parameter['x-proxy-header'] && !data.isNode)
 						return;
 
-					if (_.isString(parameter.$ref)) {
-						var segments = parameter.$ref.split('/');
-						parameter = swagger.parameters[segments.length === 1 ? segments[0] : segments[2]];
-					}
+					if (_.has(parameter, 'schema') && _.isString(parameter.schema.$ref))
+						parameter.type = that.camelCase(that.getRefType(parameter.schema.$ref));
 
 					parameter.camelCaseName = that.camelCase(parameter.name);
+
+					if (parameter.type === 'integer' || parameter.type === 'double')
+						parameter.typescriptType = 'number';
+					else
+						parameter.typescriptType = parameter.type;
+
 
 					if (parameter.enum && parameter.enum.length === 1) {
 						parameter.isSingleton = true;
@@ -182,23 +202,30 @@ var Generator = (function () {
 
 					if (parameter.in === 'body')
 						parameter.isBodyParameter = true;
+
 					else if (parameter.in === 'path')
 						parameter.isPathParameter = true;
+
 					else if (parameter.in === 'query') {
+						parameter.isQueryParameter = true;
 						if (parameter['x-name-pattern'])
 							parameter.isPatternType = true;
-						parameter.isQueryParameter = true;
 					}
 					else if (parameter.in === 'header')
 						parameter.isHeaderParameter = true;
+
 					else if (parameter.in === 'formData')
 						parameter.isFormParameter = true;
 
 					method.parameters.push(parameter);
 				});
 
+				method.parameters[method.parameters.length - 1].last = true;
+
 				data.methods.push(method);
 			});
+
+
 		});
 
 		_.forEach(swagger.definitions, function (defin, defVal) {
@@ -239,8 +266,15 @@ var Generator = (function () {
 
 			data.definitions.push(definition);
 		});
+		
+		data.definitions[data.definitions.length - 1].last = true;
 
 		return data;
+	}
+
+	Generator.prototype.getRefType = function (refString) {
+		var segments = refString.split('/');
+		return segments.length === 3 ? segments[2] : segments[0];
 	}
 
 	Generator.prototype.getPathToMethodName = function (m, path) {

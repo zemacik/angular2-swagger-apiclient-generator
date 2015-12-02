@@ -1,4 +1,9 @@
 typings
 node_modules
 .idea
+.vs
+.vscode
+.idea
+bin
+obj
 output
