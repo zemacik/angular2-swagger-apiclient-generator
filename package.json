@@ -1,0 +1,45 @@
+{
+  "name": "angular2-swagger-apiclient-generator",
+  "version": "0.0.1",
+  "description": "Angular 2 API client generator from swagger json",
+  "homepage": "https://github.com/XXXXXX/YYYYYYYYYY",
+  "main": "./src/main.js",
+  "bin": {
+    "a2apigen": "./src/main.js"
+  },
+  "author": {
+    "name": "Michal Krchnavy",
+    "email": "michal@krchnavy.sk",
+    "url": "http://www.krchnavy.sk"
+  },
+  "bugs": {
+    "url": "https://github.com/XXXXXX/YYYYYYYYYY/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/XXXXXX/angular2-swagger-apiclient-generator.git"
+  },
+  "keywords": [
+    "swagger",
+    "rest",
+    "angular2",
+    "angular",
+    "scaffolding",
+    "webapi",
+    "api",
+    "generator"
+  ],
+  "license": "APACHE",
+  "scripts": {
+    "a2apigen": "a2apigen -s swagger.json"
+  },
+  "dependencies": {
+    "js-beautify": "^1.5.10",
+    "lodash": "^3.10.1",
+    "mustache": "^2.2.0",
+    "optimist": "^0.6.1",
+    "tslint": "^3.1.1",
+    "typescript": "^1.7.3"
+  },
+  "devDependencies": {}
+}

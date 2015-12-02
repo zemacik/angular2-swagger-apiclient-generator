@@ -1,0 +1,51 @@
+import { Injectable } from 'angular2/angular2';
+import { Http, Response, Headers } from 'angular2/http';
+
+{{#definitions}}
+import {{name}} from './models/{{name}}'
+{{/definitions}}
+
+@Injectable()
+export class {{&className}}ApiClientService {
+
+	constructor(public http: Http, options?: any) {
+		var domain = (typeof options === 'object') ? options.domain : options;
+		this.domain = typeof(domain) === 'string' ? domain : '{{&domain}}';
+		
+		if(this.domain.length === 0) {
+			throw new Error('Domain parameter must be specified as a string.');
+		}
+		
+		{{#isSecure}}
+			this.token = (typeof options === 'object') ? (options.token ? options.token : {}) : {};
+		{{/isSecure}}
+	}
+
+
+{{#methods}}
+	/**
+	* {{&summary}}
+	* @method
+	* @name {{&methodName}}
+	{{#parameters}}
+	{{^isSingleton}} * @param {{=<% %>=}}{<%&type%>}<%={{ }}=%> {{&camelCaseName}} - {{&description}}{{/isSingleton}}
+	{{/parameters}}
+	* 
+	*/
+	public {{&methodName}}(parameters) {
+		if(parameters === undefined)
+				parameters = {};
+				
+		var domain = this.domain;
+		var path = '{{&path}}';	
+		
+		let headers = new Headers();
+		
+		//headers.append('Content-Type', 'application/x-www-form-urlencoded');
+		
+		return this.http.GETPOSTUPDATEDELETE(uri,data,{headers: headers});
+	}
+	
+{{/methods}}
+
+}
