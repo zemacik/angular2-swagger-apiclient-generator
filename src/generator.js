@@ -264,8 +264,8 @@ var Generator = (function () {
             data.definitions.push(definition);
         });
 
-
-        data.definitions[data.definitions.length - 1].last = true;
+        if (data.definitions.length > 0)
+            data.definitions[data.definitions.length - 1].last = true;
 
         return data;
     }

@@ -32,3 +32,8 @@ This command will generate API client described in swagger.json file to ./out fo
 ```
 a2apigen -s .\tests\apis\swagger.json -o ./out
 ```
+
+or from repository directory run:
+```
+node ./src/main -s .\tests\apis\swagger.json -o ./outa2apigen
+```
