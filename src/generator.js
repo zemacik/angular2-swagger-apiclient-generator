@@ -87,7 +87,7 @@ var Generator = (function () {
         if (this.initialized !== true)
             this.initialize();
 
-        var outputdir = this._outputPath + '/models';
+        var outputdir = this._outputPath;
 
         if (!fs.existsSync(outputdir))
             fs.mkdirSync(outputdir);
@@ -95,7 +95,7 @@ var Generator = (function () {
         this.LogMessage('Rendering common models export');
         var result = this.renderLintAndBeautify(this.templates.models_export, this.viewModel, this.templates);
 
-        var outfile = outputdir + "/" + this.viewModel.className + '_models' + ".ts";
+        var outfile = outputdir + "/models.ts";
 
         this.LogMessage('Creating output file', outfile);
         fs.writeFileSync(outfile, result, 'utf-8')
@@ -148,9 +148,15 @@ var Generator = (function () {
             });
 
             _.forEach(api, function (op, m) {
-                if (authorizedMethods.indexOf(m.toUpperCase()) === -1)
+                if (authorizedMethods.indexOf(m.toUpperCase()) === -1){
                     return;
-
+                }
+                
+                var summaryLines = op.description.split('\n');
+                summaryLines.splice(summaryLines.length-1, 1);
+                
+                
+                
                 var method = {
                     path: path,
                     className: CLASS_NAME,
@@ -158,10 +164,11 @@ var Generator = (function () {
                     method: m.toUpperCase(),
                     angular2httpMethod: m.toLowerCase(),
                     isGET: m.toUpperCase() === 'GET',
-                    summary: op.description,
+                    hasPayload: !_.includes(['GET','DELETE','HEAD'], m.toUpperCase()), 
+                    summaryLines: summaryLines,
                     isSecure: swagger.security !== undefined || op.security !== undefined,
                     parameters: [],
-                    hasJsonResponse: _.some(op.produces, function (response) { // TODO PREROBIT
+                    hasJsonResponse: _.some(_.defaults([], swagger.produces, op.produces), function (response) { // TODO PREROBIT
                         return response.indexOf('/json') != -1;
                     })
                 };

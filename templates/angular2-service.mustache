@@ -1,12 +1,11 @@
-import { Injectable } from 'angular2/angular2';
+/* tslint:disable */
+import { Injectable } from 'angular2/core';
 import { Http, Response, Headers } from 'angular2/http';
-import { {{&className}}_MODELS } from './models/{{&className}}_models';
+import { {{#definitions}}{{name}}{{^last}}, {{/last}}{{/definitions}} } from './models';
 
 @Injectable()
-export class {{&className}}ApiClientService {
-	
+export class ApiClientService {
 	domain:string;
-	
 	constructor(public http: Http, options?: any) {
 		var domain = (typeof options === 'object') ? options.domain : options;
 		this.domain = typeof(domain) === 'string' ? domain : '{{&domain}}';
@@ -23,7 +22,10 @@ export class {{&className}}ApiClientService {
 
 {{#methods}}
 	/**
-	* {{&summary}}
+	{{#summaryLines}}
+  * {{&.}}
+  {{/summaryLines}}
+  *
 	* @method
 	* @name {{&methodName}}
 	{{#parameters}}
@@ -87,10 +89,10 @@ export class {{&className}}ApiClientService {
 {{/parameters}}		
 	
 		return this.http
-			.{{angular2httpMethod}}(this.domain + uri, payload, { headers: headers, params: queryParameters })
+			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, JSON.stringify(payload){{/hasPayload}}, { headers: headers, params: queryParameters })
 			.map((res: Response) => {
 			   {{#hasJsonResponse}}
-               var result = res.json();
+         var result = res.json();
 			   {{/hasJsonResponse}}
 			   {{^hasJsonResponse}}
 			   var result = null;
@@ -98,8 +100,8 @@ export class {{&className}}ApiClientService {
 			   // TODO: this method does not return JSON response, so you need to handle response by your own
 			   {{/hasJsonResponse}}
 			   
-               return result;
-            });
+         return result;
+      });
 	}
 	
 {{/methods}}
