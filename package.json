@@ -30,7 +30,8 @@
   ],
   "license": "APACHE",
   "scripts": {
-    "a2apigen": "a2apigen -s swagger.json"
+    "a2apigen": "a2apigen -s swagger.json",
+    "postinstall": "gulp"
   },
   "dependencies": {
     "gulp": "^3.9.1",
