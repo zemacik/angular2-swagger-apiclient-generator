@@ -8,6 +8,10 @@ import {Observable} from 'rxjs/Observable';
 @Injectable()
 export class ApiClientService {
 	domain:string;
+  
+  constructor(public http: Http){
+  }
+  /*
 	constructor(public http: Http, options?: any) {
 		var domain = (typeof options === 'object') ? options.domain : options;
 		this.domain = typeof(domain) === 'string' ? domain : '{{&domain}}';
@@ -20,6 +24,7 @@ export class ApiClientService {
 			this.token = (typeof options === 'object') ? (options.token ? options.token : {}) : {};
 		{{/isSecure}}
 	}
+  */
 
 
 {{#methods}}
