@@ -10,6 +10,12 @@ export class ApiClientService {
 	domain:string;
   
   constructor(public http: Http){
+    {{#swagger.x-dev-host}}
+    this.domain = '{{&.}}';
+    {{/swagger.x-dev-host}}
+    {{^swagger.x-dev-host}}
+    this.domain = '';
+    {{/swagger.x-dev-host}}
   }
   /*
 	constructor(public http: Http, options?: any) {
@@ -41,7 +47,7 @@ export class ApiClientService {
 	* 
 	*/
 	public {{&methodName}}({{#parameters}}{{&camelCaseName}}: {{typescriptType}}{{^last}}, {{/last}}{{/parameters}}) {
-		var uri = '{{&path}}';
+		var uri = '{{#swagger.basePath}}{{&.}}{{/swagger.basePath}}{{&path}}';
 		var payload = {};	
 		var queryParameters = {};
 		let headers = new Headers();
