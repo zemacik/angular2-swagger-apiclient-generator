@@ -74,7 +74,7 @@ export class ApiClientService {
 			{{/isSingleton}}
 			{{/isQueryParameter}}
 			{{#isPathParameter}}
-		uri = uri.replace('{{=<% %>=}}/\{<%&name%>\}/<%={{ }}=%>', {{&camelCaseName}});
+		uri = uri.replace('{{=<% %>=}}{<%&name%>}<%={{ }}=%>', {{&camelCaseName}});
 			{{/isPathParameter}}
 			{{#isHeaderParameter}}
 			{{#isSingleton}}
