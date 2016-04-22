@@ -47,68 +47,67 @@ export class ApiClientService {
 	* 
 	*/
 	public {{&methodName}}({{#parameters}}{{&camelCaseName}}: {{typescriptType}}{{^last}}, {{/last}}{{/parameters}}) {
-		var uri = '{{#swagger.basePath}}{{&.}}{{/swagger.basePath}}{{&path}}';
-		var payload = {};	
-		var queryParameters = {};
+		let payload = {};	
+		let queryParameters = {};
 		let headers = new Headers();
 		headers.append('Content-Type', 'application/json');
 		
 {{#parameters}}
 			{{#isQueryParameter}}
-			{{#isSingleton}}
+			  {{#isSingleton}}
 		queryParameters['{{&name}}'] = '{{&singleton}}';
-			{{/isSingleton}}
-			{{^isSingleton}}
-			{{#isPatternType}}
+        {{/isSingleton}}
+      
+			  {{^isSingleton}}
+			    {{#isPatternType}}
 		Object.keys(parameters).forEach(function(parameterName) {
 			if(new RegExp('{{&pattern}}').test(parameterName)){
 				queryParameters[parameterName] = parameters[parameterName];
 			}
 		});
-			{{/isPatternType}}
-			{{^isPatternType}}
+          {{/isPatternType}}
+			    {{^isPatternType}}
 		if(parameters['{{&camelCaseName}}'] !== undefined){
 			queryParameters['{{&name}}'] = parameters['{{&camelCaseName}}'];
 		}
-			{{/isPatternType}}
-			{{/isSingleton}}
+          {{/isPatternType}}
+        {{/isSingleton}}
 			{{/isQueryParameter}}
-			{{#isPathParameter}}
-		uri = uri.replace('{{=<% %>=}}{<%&name%>}<%={{ }}=%>', {{&camelCaseName}});
-			{{/isPathParameter}}
+			
 			{{#isHeaderParameter}}
-			{{#isSingleton}}
+			  {{#isSingleton}}
 		headers.append('{{&name}}', '{{&singleton}}');
-			{{/isSingleton}}
-			{{^isSingleton}}
+        {{/isSingleton}}
+        {{^isSingleton}}
 		if(parameters['{{&camelCaseName}}'] !== undefined){
 			headers.append('{{&name}}', parameters['{{&camelCaseName}}']);
 		}
-			{{/isSingleton}}
+        {{/isSingleton}}
 			{{/isHeaderParameter}}
 			{{#isBodyParameter}}
 		payload['{{&name}}'] = {{&camelCaseName}};
 			{{/isBodyParameter}}
 			{{#isFormParameter}}
-			{{#isSingleton}}
+			  {{#isSingleton}}
 		form['{{&name}}'] = '{{&singleton}}';
-			{{/isSingleton}}
-			{{^isSingleton}}
+        {{/isSingleton}}
+        {{^isSingleton}}
 		if(parameters['{{&camelCaseName}}'] !== undefined){
 			form['{{&name}}'] = parameters['{{&camelCaseName}}'];
 		}
-			{{/isSingleton}}
+			  {{/isSingleton}}
 			{{/isFormParameter}}
 {{/parameters}}		
-	
+		let uri = `{{#swagger.basePath}}{{&.}}{{/swagger.basePath}}{{&path}}`;
+	  
 		return this.http
 			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, JSON.stringify(payload){{/hasPayload}}, { headers: headers, params: queryParameters })
 			.map((res: Response) => {
 			   {{#hasJsonResponse}}
-         var result = res.json();
+         let result = res.json();
 			   {{/hasJsonResponse}}
 			   {{^hasJsonResponse}}
-			   var result = null;
+			   let result = null;
 			   
 			   // TODO: this method does not return JSON response, so you need to handle response by your own
 			   {{/hasJsonResponse}}
