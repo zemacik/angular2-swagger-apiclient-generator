@@ -125,15 +125,11 @@ var Generator = (function () {
         var that = this;
         var swagger = this.swaggerParsed;
         var authorizedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-        var CLASS_NAME = "TEST_CLASS_NAME";
-        var MODULE_NAME = "TEST_MODULE";
         var data = {
             isNode: false,
             description: swagger.info.description,
             isSecure: swagger.securityDefinitions !== undefined,
             swagger: swagger,
-            moduleName: MODULE_NAME,
-            className: CLASS_NAME,
             domain: (swagger.schemes && swagger.schemes.length > 0 && swagger.host && swagger.basePath) ? swagger.schemes[0] + '://' + swagger.host + swagger.basePath : '',
             methods: [],
             definitions: []

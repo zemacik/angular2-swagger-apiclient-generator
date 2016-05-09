@@ -13,12 +13,12 @@ export class ApiClientService {
 	domain:string;
   
   constructor(public http: Http){
-    {{#swagger.x-dev-host}}
+    {{#swagger.domain}}
     this.domain = '{{&.}}';
-    {{/swagger.x-dev-host}}
-    {{^swagger.x-dev-host}}
+    {{/swagger.domain}}
+    {{^swagger.domain}}
     this.domain = '';
-    {{/swagger.x-dev-host}}
+    {{/swagger.domain}}
   }
   /*
 	constructor(public http: Http, options?: any) {
