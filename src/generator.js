@@ -156,7 +156,6 @@ var Generator = (function () {
                 
                 var method = {
                     path: path,
-                    className: CLASS_NAME,
                     methodName: op['x-swagger-js-method-name'] ? op['x-swagger-js-method-name'] : (op.operationId ? op.operationId : that.getPathToMethodName(m, path)),
                     method: m.toUpperCase(),
                     angular2httpMethod: m.toLowerCase(),
