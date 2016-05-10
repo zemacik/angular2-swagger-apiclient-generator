@@ -149,8 +149,12 @@ var Generator = (function () {
                     return;
                 }
                 
-                var summaryLines = op.description.split('\n');
-                summaryLines.splice(summaryLines.length-1, 1);
+                // The description line is optional in the spec
+                var summaryLines = [];
+                if (op.description) {
+                    summaryLines = op.description.split('\n');
+                    summaryLines.splice(summaryLines.length-1, 1);
+                }
                 
                 
                 
