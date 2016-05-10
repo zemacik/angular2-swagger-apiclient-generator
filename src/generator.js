@@ -55,7 +55,7 @@ var Generator = (function () {
         this.LogMessage('Rendering template for API');
         var result = this.renderLintAndBeautify(this.templates.class, this.viewModel, this.templates);
 
-        var outfile = this._outputPath + "/" + "client.ts";
+        var outfile = this._outputPath + "/" + "index.ts";
         this.LogMessage('Creating output file', outfile);
         fs.writeFileSync(outfile, result, 'utf-8')
     };
