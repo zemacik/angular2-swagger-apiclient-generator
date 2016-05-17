@@ -160,6 +160,7 @@ var Generator = (function () {
                 
                 var method = {
                     path: path,
+                    backTickPath: path.replace(/(\{.*?\})/g, "$$$1"),
                     methodName: op['x-swagger-js-method-name'] ? op['x-swagger-js-method-name'] : (op.operationId ? op.operationId : that.getPathToMethodName(m, path)),
                     method: m.toUpperCase(),
                     angular2httpMethod: m.toLowerCase(),

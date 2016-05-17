@@ -13,12 +13,12 @@ export class ApiClientService {
 	domain:string;
   
   constructor(public http: Http){
-    {{#swagger.domain}}
+    {{#domain}}
     this.domain = '{{&.}}';
-    {{/swagger.domain}}
-    {{^swagger.domain}}
+    {{/domain}}
+    {{^domain}}
     this.domain = '';
-    {{/swagger.domain}}
+    {{/domain}}
   }
   /*
 	constructor(public http: Http, options?: any) {
@@ -101,21 +101,12 @@ export class ApiClientService {
 			  {{/isSingleton}}
 			{{/isFormParameter}}
 {{/parameters}}		
-		let uri = `{{#swagger.basePath}}{{&.}}{{/swagger.basePath}}{{&path}}`;
+		let uri = `{{&backTickPath}}`;
 	  
 		return this.http
 			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, JSON.stringify({{#parameters}}{{#isBodyParameter}}{{&camelCaseName}}{{/isBodyParameter}}{{/parameters}}){{/hasPayload}}, { headers: headers, params: queryParameters })
 			.map((res: Response) => {
-			   {{#hasJsonResponse}}
-         let result = res.json();
-			   {{/hasJsonResponse}}
-			   {{^hasJsonResponse}}
-			   let result = null;
-			   
-			   // TODO: this method does not return JSON response, so you need to handle response by your own
-			   {{/hasJsonResponse}}
-			   
-         return result;
+        return res;
       });
 	}
 	
