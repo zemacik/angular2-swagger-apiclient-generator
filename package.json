@@ -5,7 +5,7 @@
   "homepage": "https://github.com/nvdnkpr/angular2-swagger-client-generator",
   "main": "index.js",
   "bin": {
-    "a2apigen": "./bin/a2apigen.js"
+    "a2apigen": "./src/a2apigen.js"
   },
   "author": {
     "name": "Navid Nikpour",
