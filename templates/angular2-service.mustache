@@ -1,6 +1,6 @@
 /* tslint:disable */
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers } from '@angular/http';
+import { Http, Response, RequestOptions, URLSearchParams, Headers } from '@angular/http';
 import { {{#definitions}}{{name}}{{^last}}, {{/last}}{{/definitions}} } from './models';
 import 'rxjs/Rx';
 
@@ -77,26 +77,28 @@ export class ApiClientService {
 	*/
 	public {{&methodName}}({{#parameters}}{{&camelCaseName}}: {{typescriptType}}{{^last}}, {{/last}}{{/parameters}}) {
 		let payload = {};
-		let queryParameters = {};
+		let params = new URLSearchParams();
 		let headers = this.getDefaultHeaders();
 
 {{#parameters}}
 			{{#isQueryParameter}}
 			  {{#isSingleton}}
-		queryParameters['{{&name}}'] = '{{&singleton}}';
+		params.set('{{&name}}','{{&singleton}}');
         {{/isSingleton}}
 
 			  {{^isSingleton}}
 			    {{#isPatternType}}
-		Object.keys(parameters).forEach(function(parameterName) {
-			if(new RegExp('{{&pattern}}').test(parameterName)){
-				queryParameters[parameterName] = parameters[parameterName];
-			}
-		});
+		/* What does this do?
+     * Object.keys(parameters).forEach(function(parameterName) {
+		 *	if(new RegExp('{{&pattern}}').test(parameterName)){
+		 *	params.set('parameterName',parameters[parameterName]);
+		 * }
+		 * });
+     */
           {{/isPatternType}}
 			    {{^isPatternType}}
-		if(parameters['{{&camelCaseName}}'] !== undefined){
-			queryParameters['{{&name}}'] = parameters['{{&camelCaseName}}'];
+		if({{&camelCaseName}} !== undefined){
+			params.set('{{&name}}',{{&camelCaseName}}.toString());
 		}
           {{/isPatternType}}
         {{/isSingleton}}
@@ -107,8 +109,8 @@ export class ApiClientService {
 		headers.append('{{&name}}', '{{&singleton}}');
         {{/isSingleton}}
         {{^isSingleton}}
-		if(parameters['{{&camelCaseName}}'] !== undefined){
-			headers.append('{{&name}}', parameters['{{&camelCaseName}}']);
+		if({{&camelCaseName}} !== undefined){
+			headers.append('{{&name}}', {{&camelCaseName}}.toString());
 		}
         {{/isSingleton}}
 			{{/isHeaderParameter}}
@@ -117,19 +119,21 @@ export class ApiClientService {
 			{{/isBodyParameter}}
 			{{#isFormParameter}}
 			  {{#isSingleton}}
+        // Form undefined ?
 		form['{{&name}}'] = '{{&singleton}}';
         {{/isSingleton}}
         {{^isSingleton}}
-		if(parameters['{{&camelCaseName}}'] !== undefined){
-			form['{{&name}}'] = parameters['{{&camelCaseName}}'];
+		if({{&camelCaseName}} !== undefined){
+      // Form undefined ?
+			form['{{&name}}'] = {{&camelCaseName}};
 		}
 			  {{/isSingleton}}
 			{{/isFormParameter}}
 {{/parameters}}
 		let uri = `{{&backTickPath}}`;
-
+    let requestOptions = new RequestOptions({headers: headers,search:params});
 		return this.http
-			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, JSON.stringify({{#parameters}}{{#isBodyParameter}}{{&camelCaseName}}{{/isBodyParameter}}{{/parameters}}){{/hasPayload}}, { headers: headers, params: queryParameters })
+			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, JSON.stringify({{#parameters}}{{#isBodyParameter}}{{&camelCaseName}}{{/isBodyParameter}}{{/parameters}}){{/hasPayload}}, requestOptions)
 			.map(this.extractData);
 	}
 
