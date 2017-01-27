@@ -35,6 +35,32 @@ export class ApiClientService {
 	}
   */
 
+  /**
+  *
+	* @method
+	* @name extractData
+	*
+	*/
+  private extractData(res: Response){
+    return res;
+  }
+
+  /**
+  *
+	* @method
+	* @name getDefaultHeaders
+	*
+	*/
+  private getDefaultHeaders(): Headers {
+    let headers = new Headers();
+
+    // Use this methode to insert some headers that are send with each request.
+    // Usefull for setting the `Autorization header` or any other header you want send with each request.
+
+    headers.set('Content-Type','application/json');
+    return headers;
+  }
+
 
 {{#methods}}
 	/**
@@ -52,8 +78,7 @@ export class ApiClientService {
 	public {{&methodName}}({{#parameters}}{{&camelCaseName}}: {{typescriptType}}{{^last}}, {{/last}}{{/parameters}}) {
 		let payload = {};
 		let queryParameters = {};
-		let headers = new Headers();
-		headers.append('Content-Type', 'application/json');
+		let headers = this.getDefaultHeaders();
 
 {{#parameters}}
 			{{#isQueryParameter}}
@@ -105,9 +130,7 @@ export class ApiClientService {
 
 		return this.http
 			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, JSON.stringify({{#parameters}}{{#isBodyParameter}}{{&camelCaseName}}{{/isBodyParameter}}{{/parameters}}){{/hasPayload}}, { headers: headers, params: queryParameters })
-			.map((res: Response) => {
-        return res;
-      });
+			.map(this.extractData);
 	}
 
 {{/methods}}
