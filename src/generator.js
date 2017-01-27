@@ -130,7 +130,7 @@ var Generator = (function () {
             description: swagger.info.description,
             isSecure: swagger.securityDefinitions !== undefined,
             swagger: swagger,
-            domain: (swagger.schemes && swagger.schemes.length > 0 && swagger.host && swagger.basePath) ? swagger.schemes[0] + '://' + swagger.host + swagger.basePath : '',
+            domain: (swagger.schemes && swagger.schemes.length > 0 && swagger.host) ? swagger.schemes[0] + '://' + swagger.host + (swagger.basePath || '') : '',
             methods: [],
             definitions: []
         };
