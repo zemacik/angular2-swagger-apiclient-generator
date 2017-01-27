@@ -149,6 +149,8 @@ var Generator = (function () {
                     return;
                 }
 
+                var summary = op.summary || '';
+
                 // The description line is optional in the spec
                 var summaryLines = [];
                 if (op.description) {
@@ -166,6 +168,7 @@ var Generator = (function () {
                     angular2httpMethod: m.toLowerCase(),
                     isGET: m.toUpperCase() === 'GET',
                     hasPayload: !_.includes(['GET','DELETE','HEAD'], m.toUpperCase()),
+                    summary: summary,
                     summaryLines: summaryLines,
                     isSecure: swagger.security !== undefined || op.security !== undefined,
                     parameters: [],
