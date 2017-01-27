@@ -127,7 +127,7 @@ var Generator = (function () {
         var authorizedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
         var data = {
             isNode: false,
-            description: swagger.info.description,
+            description: (swagger.info && swagger.info.description) ? swagger.info.description : '',
             isSecure: swagger.securityDefinitions !== undefined,
             swagger: swagger,
             domain: (swagger.schemes && swagger.schemes.length > 0 && swagger.host) ? swagger.schemes[0] + '://' + swagger.host + (swagger.basePath || '') : '',
