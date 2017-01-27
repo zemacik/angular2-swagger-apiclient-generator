@@ -174,6 +174,26 @@ var Generator = (function () {
                     })
                 };
 
+                if(op.responses && op.responses['200'] && op.responses['200'].schema){
+                  var schema = op.responses['200'].schema;
+
+                  if(schema.type) {
+                    if(schema.type === 'array'){
+                      // Do something here
+                      //method.returns += '[]';
+                      if(schema.items && schema.items['$ref']){
+                        var refType = schema.items['$ref'];
+                        method.returns = refType.substring(refType.lastIndexOf('/')+1) + '[]';
+                      }
+                    } else {
+                      method.returns = schema.type;
+                    }
+                  } else if(schema['$ref']){
+                      var refType = schema['$ref'];
+                      method.returns = refType.substring(refType.lastIndexOf('/')+1);
+                  }
+                }
+
                 var params = [];
 
                 if (_.isArray(op.parameters))
@@ -204,8 +224,11 @@ var Generator = (function () {
                         parameter.singleton = parameter.enum[0];
                     }
 
-                    if (parameter.in === 'body')
-                        parameter.isBodyParameter = true;
+                    if (parameter.in === 'body') {
+                      parameter.isBodyParameter = true;
+                      method.hasBodyParamters = true;
+                    }
+
 
                     else if (parameter.in === 'path')
                         parameter.isPathParameter = true;

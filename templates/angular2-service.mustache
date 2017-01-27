@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Http, Response, RequestOptions, URLSearchParams, Headers } from '@angular/http';
 import { {{#definitions}}{{name}}{{^last}}, {{/last}}{{/definitions}} } from './models';
-import 'rxjs/Rx';
+import { Observable } from 'rxjs';
 
 
 @Injectable()
@@ -38,10 +38,14 @@ export class ApiClientService {
   /**
   *
 	* @method
-	* @name extractData
+	* @name returnBody
 	*
 	*/
-  private extractData(res: Response){
+  private returnBody(res: Response){
+    return res.json();
+  }
+
+  private returnResponse(res: Response){
     return res;
   }
 
@@ -73,9 +77,8 @@ export class ApiClientService {
 	{{#parameters}}
 	{{^isSingleton}}* @param {{=<% %>=}}{<%&type%>}<%={{ }}=%> {{&camelCaseName}} - {{&description}}{{/isSingleton}}
 	{{/parameters}}
-	*
 	*/
-	public {{&methodName}}({{#parameters}}{{&camelCaseName}}: {{typescriptType}}{{^last}}, {{/last}}{{/parameters}}) {
+	public {{&methodName}}({{#parameters}}{{&camelCaseName}}: {{typescriptType}}{{^last}}, {{/last}}{{/parameters}}){{#returns}}: Observable<{{returns}}>{{/returns}} {
 		let payload = {};
 		let params = new URLSearchParams();
 		let headers = this.getDefaultHeaders();
@@ -133,8 +136,8 @@ export class ApiClientService {
 		let uri = `{{&backTickPath}}`;
     let requestOptions = new RequestOptions({headers: headers,search:params});
 		return this.http
-			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, JSON.stringify({{#parameters}}{{#isBodyParameter}}{{&camelCaseName}}{{/isBodyParameter}}{{/parameters}}){{/hasPayload}}, requestOptions)
-			.map(this.extractData);
+			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, {{#hasBodyParamters}}JSON.stringify({{#parameters}}{{#isBodyParameter}}{{&camelCaseName}}{{/isBodyParameter}}{{/parameters}}){{/hasBodyParamters}}{{^hasBodyParamters}}null{{/hasBodyParamters}}{{/hasPayload}}, requestOptions)
+			{{#returns}}.map(this.returnBody);{{/returns}}{{^returns}}.map(this.returnResponse);{{/returns}}
 	}
 
 {{/methods}}
