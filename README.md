@@ -15,6 +15,7 @@ or
 1. `cd angular2-swagger-client-generator`
 1. `npm install`
 1. `npm run build`
+1. If you want to run globally run `npm install -g`
 
 ## Usage
 
@@ -44,4 +45,3 @@ node ./src/main -s .\tests\apis\swagger.json -o ./out
 This project was inspired by:
 
 [swagger-js-codegen](https://github.com/wcandillon/swagger-js-codegen) project
-
