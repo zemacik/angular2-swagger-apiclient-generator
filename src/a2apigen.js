@@ -20,7 +20,7 @@ var optimist = require('optimist')
 
 var fs = require('fs');
 
-var genRef = require('./generator');
+var genRef = require('../lib/generator');
 
 var argv = optimist.argv;
 
@@ -83,3 +83,4 @@ else {
     g.Debug = true;
     g.generateAPIClient();
 }
+
