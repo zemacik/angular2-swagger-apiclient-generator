@@ -1,6 +1,6 @@
 /* tslint:disable */
-import { Injectable } from 'angular2/core';
-import { Http, Response, Headers } from 'angular2/http';
+import { Injectable } from '@angular/core';
+import { Http, Response, Headers } from '@angular/http';
 import { {{#definitions}}{{name}}{{^last}}, {{/last}}{{/definitions}} } from './models';
 import 'rxjs/Rx';
 
@@ -11,7 +11,7 @@ import 'rxjs/Rx';
  */
 export class ApiClientService {
 	domain:string;
-  
+
   constructor(public http: Http){
     {{#domain}}
     this.domain = '{{&.}}';
@@ -24,11 +24,11 @@ export class ApiClientService {
 	constructor(public http: Http, options?: any) {
 		var domain = (typeof options === 'object') ? options.domain : options;
 		this.domain = typeof(domain) === 'string' ? domain : '{{&domain}}';
-		
+
 		if(this.domain.length === 0) {
 			throw new Error('Domain parameter must be specified as a string.');
 		}
-		
+
 		{{#isSecure}}
 			this.token = (typeof options === 'object') ? (options.token ? options.token : {}) : {};
 		{{/isSecure}}
@@ -47,20 +47,20 @@ export class ApiClientService {
 	{{#parameters}}
 	{{^isSingleton}}* @param {{=<% %>=}}{<%&type%>}<%={{ }}=%> {{&camelCaseName}} - {{&description}}{{/isSingleton}}
 	{{/parameters}}
-	* 
+	*
 	*/
 	public {{&methodName}}({{#parameters}}{{&camelCaseName}}: {{typescriptType}}{{^last}}, {{/last}}{{/parameters}}) {
-		let payload = {};	
+		let payload = {};
 		let queryParameters = {};
 		let headers = new Headers();
 		headers.append('Content-Type', 'application/json');
-		
+
 {{#parameters}}
 			{{#isQueryParameter}}
 			  {{#isSingleton}}
 		queryParameters['{{&name}}'] = '{{&singleton}}';
         {{/isSingleton}}
-      
+
 			  {{^isSingleton}}
 			    {{#isPatternType}}
 		Object.keys(parameters).forEach(function(parameterName) {
@@ -76,7 +76,7 @@ export class ApiClientService {
           {{/isPatternType}}
         {{/isSingleton}}
 			{{/isQueryParameter}}
-			
+
 			{{#isHeaderParameter}}
 			  {{#isSingleton}}
 		headers.append('{{&name}}', '{{&singleton}}');
@@ -100,16 +100,16 @@ export class ApiClientService {
 		}
 			  {{/isSingleton}}
 			{{/isFormParameter}}
-{{/parameters}}		
+{{/parameters}}
 		let uri = `{{&backTickPath}}`;
-	  
+
 		return this.http
 			.{{angular2httpMethod}}(this.domain + uri{{#hasPayload}}, JSON.stringify({{#parameters}}{{#isBodyParameter}}{{&camelCaseName}}{{/isBodyParameter}}{{/parameters}}){{/hasPayload}}, { headers: headers, params: queryParameters })
 			.map((res: Response) => {
         return res;
       });
 	}
-	
+
 {{/methods}}
 
 }
