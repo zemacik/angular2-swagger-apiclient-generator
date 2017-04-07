@@ -4,22 +4,18 @@ Angular 2 API client generator from swagger json
 # Description
 This package generates a angular2 typescript class from a swagger v2.0 specification file. The code is generated using mustache templates.
 
-# Disclaimer
-This project is not yet stable, nor working properly
-I'm still working on it.
-
 # How to get it working
 
 ## Installation
-1. `npm install angular2-swagger-apiclient-generator`
+1. `npm install angular2-swagger-client-generator`
 
 or
 
-1. get it from github `git clone https://github.com/zemacik/angular2-swagger-apiclient-generator`
-1. `cd angular2-swagger-apiclient-generator`
-
-
+1. get it from github `git clone https://github.com/nvdnkpr/angular2-swagger-client-generator`
+1. `cd angular2-swagger-client-generator`
 1. `npm install`
+1. `npm run build`
+1. If you want to run globally run `npm install -g`
 
 ## Usage
 
@@ -49,4 +45,3 @@ node ./src/main -s .\tests\apis\swagger.json -o ./out
 This project was inspired by:
 
 [swagger-js-codegen](https://github.com/wcandillon/swagger-js-codegen) project
-

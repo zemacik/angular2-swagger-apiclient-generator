@@ -1,23 +1,22 @@
 {
-  "name": "angular2-swagger-apiclient-generator",
-  "version": "0.0.1",
+  "name": "angular2-swagger-client-generator",
+  "version": "0.0.21",
   "description": "Angular 2 API client generator from swagger json",
-  "homepage": "https://github.com/zemacik/angular2-swagger-apiclient-generator",
-  "main": "./src/main.js",
+  "homepage": "https://github.com/nvdnkpr/angular2-swagger-client-generator",
+  "main": "index.js",
   "bin": {
-    "a2apigen": "./src/main.js"
+    "a2apigen": "./bin/a2apigen.js"
   },
   "author": {
-    "name": "Michal Krchnavy",
-    "email": "michal@krchnavy.sk",
-    "url": "http://www.krchnavy.sk"
+    "name": "Navid Nikpour",
+    "email": "navid@nikpour.com"
   },
   "bugs": {
-    "url": "https://github.com/zemacik/angular2-swagger-apiclient-generator/issues"
+    "url": "https://github.com/nvdnkpr/angular2-swagger-client-generator/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/zemacik/angular2-swagger-apiclient-generator.git"
+    "url": "git://github.com/nvdnkpr/angular2-swagger-client-generator.git"
   },
   "keywords": [
     "swagger",
@@ -31,16 +30,21 @@
   ],
   "license": "APACHE",
   "scripts": {
-    "a2apigen": "a2apigen -s swagger.json"
+    "a2apigen": "a2apigen -s swagger.json",
+    "build": "gulp"
   },
   "dependencies": {
+    "gulp": "^3.9.1",
     "js-beautify": "^1.5.10",
     "lodash": "^3.10.1",
+    "mkdirp": "^0.5.1",
     "mustache": "^2.2.0",
     "optimist": "^0.6.1",
     "request": "^2.67.0",
     "tslint": "^3.1.1",
     "typescript": "^1.7.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
 }

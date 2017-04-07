@@ -55,7 +55,7 @@ var Generator = (function () {
         this.LogMessage('Rendering template for API');
         var result = this.renderLintAndBeautify(this.templates.class, this.viewModel, this.templates);
 
-        var outfile = this._outputPath + "/" + "client.ts";
+        var outfile = this._outputPath + "/" + "index.ts";
         this.LogMessage('Creating output file', outfile);
         fs.writeFileSync(outfile, result, 'utf-8')
     };
@@ -70,8 +70,8 @@ var Generator = (function () {
 
         if (!fs.existsSync(outputdir))
             fs.mkdirSync(outputdir);
-			
-        // generate API models				
+
+        // generate API models
         _.forEach(this.viewModel.definitions, function (definition, defName) {
             that.LogMessage('Rendering template for model: ', definition.name);
             var result = that.renderLintAndBeautify(that.templates.model, definition, that.templates);
@@ -87,7 +87,7 @@ var Generator = (function () {
         if (this.initialized !== true)
             this.initialize();
 
-        var outputdir = this._outputPath + '/models';
+        var outputdir = this._outputPath;
 
         if (!fs.existsSync(outputdir))
             fs.mkdirSync(outputdir);
@@ -95,7 +95,7 @@ var Generator = (function () {
         this.LogMessage('Rendering common models export');
         var result = this.renderLintAndBeautify(this.templates.models_export, this.viewModel, this.templates);
 
-        var outfile = outputdir + "/" + this.viewModel.className + '_models' + ".ts";
+        var outfile = outputdir + "/models.ts";
 
         this.LogMessage('Creating output file', outfile);
         fs.writeFileSync(outfile, result, 'utf-8')
@@ -117,7 +117,7 @@ var Generator = (function () {
         // Beautify *****
         // NOTE: this has been commented because of curly braces were added on newline after beaufity
         //result = beautify(result, { indent_size: 4, max_preserve_newlines: 2 });
-        
+
         return result;
     }
 
@@ -125,15 +125,12 @@ var Generator = (function () {
         var that = this;
         var swagger = this.swaggerParsed;
         var authorizedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-        var CLASS_NAME = "TEST_CLASS_NAME";
-        var MODULE_NAME = "TEST_MODULE";
         var data = {
             isNode: false,
-            description: swagger.info.description,
+            description: (swagger.info && swagger.info.description) ? swagger.info.description : '',
             isSecure: swagger.securityDefinitions !== undefined,
-            moduleName: MODULE_NAME,
-            className: CLASS_NAME,
-            domain: (swagger.schemes && swagger.schemes.length > 0 && swagger.host && swagger.basePath) ? swagger.schemes[0] + '://' + swagger.host + swagger.basePath : '',
+            swagger: swagger,
+            domain: (swagger.schemes && swagger.schemes.length > 0 && swagger.host) ? swagger.schemes[0] + '://' + swagger.host + (swagger.basePath || '') : '',
             methods: [],
             definitions: []
         };
@@ -148,23 +145,57 @@ var Generator = (function () {
             });
 
             _.forEach(api, function (op, m) {
-                if (authorizedMethods.indexOf(m.toUpperCase()) === -1)
+                if (authorizedMethods.indexOf(m.toUpperCase()) === -1){
                     return;
+                }
+
+                var summary = op.summary || '';
+
+                // The description line is optional in the spec
+                var summaryLines = [];
+                if (op.description) {
+                    summaryLines = op.description.split('\n');
+                    summaryLines.splice(summaryLines.length-1, 1);
+                }
+
+
 
                 var method = {
                     path: path,
-                    className: CLASS_NAME,
+                    backTickPath: path.replace(/(\{.*?\})/g, "$$$1"),
                     methodName: op['x-swagger-js-method-name'] ? op['x-swagger-js-method-name'] : (op.operationId ? op.operationId : that.getPathToMethodName(m, path)),
                     method: m.toUpperCase(),
                     angular2httpMethod: m.toLowerCase(),
                     isGET: m.toUpperCase() === 'GET',
-                    summary: op.description,
+                    hasPayload: !_.includes(['GET','DELETE','HEAD'], m.toUpperCase()),
+                    summary: summary,
+                    summaryLines: summaryLines,
                     isSecure: swagger.security !== undefined || op.security !== undefined,
                     parameters: [],
-                    hasJsonResponse: _.some(op.produces, function (response) { // TODO PREROBIT
+                    hasJsonResponse: _.some(_.defaults([], swagger.produces, op.produces), function (response) { // TODO PREROBIT
                         return response.indexOf('/json') != -1;
                     })
                 };
+
+                if(op.responses && op.responses['200'] && op.responses['200'].schema){
+                  var schema = op.responses['200'].schema;
+
+                  if(schema.type) {
+                    if(schema.type === 'array'){
+                      // Do something here
+                      //method.returns += '[]';
+                      if(schema.items && schema.items['$ref']){
+                        var refType = schema.items['$ref'];
+                        method.returns = refType.substring(refType.lastIndexOf('/')+1) + '[]';
+                      }
+                    } else {
+                      method.returns = schema.type;
+                    }
+                  } else if(schema['$ref']){
+                      var refType = schema['$ref'];
+                      method.returns = refType.substring(refType.lastIndexOf('/')+1);
+                  }
+                }
 
                 var params = [];
 
@@ -176,7 +207,7 @@ var Generator = (function () {
                 _.forEach(params, function (parameter) {
                     // Ignore headers which are injected by proxies & app servers
                     // eg: https://cloud.google.com/appengine/docs/go/requests#Go_Request_headers
-					
+
                     if (parameter['x-proxy-header'] && !data.isNode)
                         return;
 
@@ -196,8 +227,11 @@ var Generator = (function () {
                         parameter.singleton = parameter.enum[0];
                     }
 
-                    if (parameter.in === 'body')
-                        parameter.isBodyParameter = true;
+                    if (parameter.in === 'body') {
+                      parameter.isBodyParameter = true;
+                      method.hasBodyParamters = true;
+                    }
+
 
                     else if (parameter.in === 'path')
                         parameter.isPathParameter = true;
@@ -245,7 +279,7 @@ var Generator = (function () {
                 };
 
                 if (property.isArray)
-                    property.type = _.has(propin.items, '$ref') ? that.camelCase(propin.items["$ref"].replace("#/definitions/", "")) : propin.type;
+                    property.type = _.has(propin.items, '$ref') ? that.camelCase(propin.items["$ref"].replace("#/definitions/", "")) : propin.items.type;
                 else
                     property.type = _.has(propin, '$ref') ? that.camelCase(propin["$ref"].replace("#/definitions/", "")) : propin.type;
 

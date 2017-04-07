@@ -8,3 +8,5 @@ bin
 obj
 output
 temp
+lib
+npm-debug.log

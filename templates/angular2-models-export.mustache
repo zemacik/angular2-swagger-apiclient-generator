@@ -1,9 +1,3 @@
 {{#definitions}}
-import { {{name}} } from './{{name}}';
+export { {{name}} } from './models/{{name}}';
 {{/definitions}}
-
-export const {{&className}}_MODELS: any[] = [
-{{#definitions}}
-    {{name}}{{^last}}, {{/last}}
-{{/definitions}}
-]; 
