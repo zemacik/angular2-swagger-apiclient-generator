@@ -41,7 +41,7 @@ or from repository directory run:
 node ./src/main -s .\tests\apis\swagger.json -o ./out
 ```
 
-##Note:
+## Note:
 This project was inspired by:
 
 [swagger-js-codegen](https://github.com/wcandillon/swagger-js-codegen) project
