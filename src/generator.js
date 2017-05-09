@@ -283,16 +283,21 @@ var Generator = (function () {
                 else
                     property.type = _.has(propin, '$ref') ? that.camelCase(propin["$ref"].replace("#/definitions/", "")) : propin.type;
 
-                if (property.type === 'integer' || property.type === 'double')
+                if(property.isArray && propin.items && propin.items.type) {
+                    property.typescriptType = propin.items.type;
+                } else if (property.type === 'integer' || property.type === 'double')
                     property.typescriptType = 'number';
                 else
                     property.typescriptType = property.type;
 
 
-                if (property.isRef)
-                    definition.refs.push(property);
-                else
+                if (property.isRef) {
+                    if(!_.findWhere(definition.refs, {type: property.type})) {
+                        definition.refs.push(property);
+                    }
+                } else {
                     definition.properties.push(property);
+                }
             });
 
             data.definitions.push(definition);
