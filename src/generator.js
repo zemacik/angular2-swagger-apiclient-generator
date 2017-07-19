@@ -270,30 +270,54 @@ var Generator = (function () {
 
             _.forEach(defin.properties, function (propin, propVal) {
 
-                var property = {
-                    name: propVal,
-                    isRef: _.has(propin, '$ref') || (propin.type === 'array' && _.has(propin.items, '$ref')),
-                    isArray: propin.type === 'array',
-                    type: null,
-                    typescriptType: null
-                };
+                function getProperty(propin) {
+                    var property = {
+                        name: propVal,
+                        isRef: _.has(propin, '$ref') || (propin.type === 'array' && _.has(propin.items, '$ref')),
+                        isArray: propin.type === 'array',
+                        isObject: propin.type === 'object',
+                        type: null,
+                        typescriptType: null
+                    };
 
-                if (property.isArray)
-                    property.type = _.has(propin.items, '$ref') ? that.camelCase(propin.items["$ref"].replace("#/definitions/", "")) : propin.items.type;
-                else
-                    property.type = _.has(propin, '$ref') ? that.camelCase(propin["$ref"].replace("#/definitions/", "")) : propin.type;
+                    if (property.isArray) {
+                        property.type = _.has(propin.items, '$ref') ? that.camelCase(propin.items["$ref"].replace("#/definitions/", "")) : propin.items.type;
+                    } else {
+                        property.type = _.has(propin, '$ref') ? that.camelCase(propin["$ref"].replace("#/definitions/", "")) : propin.type;
+                    }
 
-                if(property.isArray && propin.items && propin.items.type) {
-                    property.typescriptType = propin.items.type;
-                } else if (property.type === 'integer' || property.type === 'double')
-                    property.typescriptType = 'number';
-                else
-                    property.typescriptType = property.type;
+                    if (property.isArray && propin.items && propin.items.type) {
+                        property.typescriptType = propin.items.type;
+                    } else if (property.type === 'integer' || property.type === 'double') {
+                        property.typescriptType = 'number';
+                    } else if(property.type === 'object' && propin.additionalProperties) {
+                        var additionalProperty = getProperty(propin.additionalProperties);
+                        if(additionalProperty.isArray) {
+                            property.typescriptType = '{[key: string]: '+additionalProperty.typescriptType+'[]}';
+                        } else {
+                            property.typescriptType = '{[key: string]: '+additionalProperty.typescriptType+'}';
+                        }
+                        property.type = additionalProperty.type;
+
+                        if (additionalProperty.isRef) {
+                            property.isRef = true;
+                        }
+
+                    } else {
+                        property.typescriptType = property.type;
+                    }
+                    return property;
+                }
+
+                var property = getProperty(propin);
+
 
 
                 if (property.isRef) {
                     if(!_.findWhere(definition.refs, {type: property.type})) {
                         definition.refs.push(property);
+                    } else {
+                        definition.properties.push(property);
                     }
                 } else {
                     definition.properties.push(property);
